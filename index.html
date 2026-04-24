@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>2026 GW 家族旅行 ― 奈良・京都・滋賀</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Meiryo', sans-serif;
+      background: #fffdf5;
+      color: #2d2820;
+      display: flex;
+      flex-direction: column;
+      /* height は JS で制御 */
+    }
+
+    /* ══ HEADER ══════════════════════════════════════ */
+    .header {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #1b3f6a 0%, #1e6fa0 65%, #1a6b5c 100%);
+      color: white;
+      padding: 14px 16px 12px;
+      text-align: center;
+      position: relative;
+    }
+    .header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .header .sub {
+      font-size: 0.88rem;
+      opacity: 0.88;
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+    }
+    .header .dates {
+      font-size: 0.73rem;
+      opacity: 0.65;
+      margin-top: 4px;
+    }
+    .countdown {
+      display: inline-block;
+      margin-top: 7px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.38);
+      padding: 3px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .btn-all {
+      position: absolute;
+      right: 12px;
+      top: 14px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      font-size: 0.7rem;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-all:hover, .btn-all:active { background: rgba(255,255,255,0.32); }
+
+    /* ══ MAIN LAYOUT ═════════════════════════════════ */
+    .main {
+      display: flex;
+      overflow: hidden;
+      /* height set by JS */
+    }
+
+    #map { flex: 1; min-width: 0; min-height: 0; }
+
+    /* ══ SIDEBAR ══════════════════════════════════════ */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      background: #faf8f2;
+      border-left: 1px solid #e6dfc8;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sec-head {
+      padding: 8px 14px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #9a7850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: #f2ede0;
+      border-top: 1px solid #e6dfc8;
+      border-bottom: 1px solid #e6dfc8;
+      flex-shrink: 0;
+    }
+
+    /* ── Day cards ── */
+    .day-card {
+      border-left: 4px solid transparent;
+      padding: 10px 14px 10px 11px;
+      cursor: pointer;
+      border-bottom: 1px solid #ede8db;
+      transition: background 0.12s;
+      flex-shrink: 0;
+    }
+    .day-card:hover  { background: #f0ead8; }
+    .day-card.active { background: #fff5e0; }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .card-emoji { font-size: 1.15rem; flex-shrink: 0; }
+    .card-label { font-weight: 700; font-size: 0.88rem; line-height: 1.2; }
+    .card-date  { font-size: 0.68rem; color: #aaa; margin-top: 1px; }
+
+    .spot-list { margin-left: 27px; }
+    .spot-item {
+      font-size: 0.77rem;
+      color: #666;
+      line-height: 1.6;
+      display: flex;
+      gap: 4px;
+      align-items: baseline;
+    }
+    .spot-item::before { content: "▸"; flex-shrink: 0; color: #ccc; font-size: 0.65rem; }
+    .spot-opt { color: #ccc; font-size: 0.7rem; }
+    .rest-note { margin-left: 27px; font-size: 0.77rem; color: #bbb; font-style: italic; }
+
+    /* ── Stay cards ── */
+    .stay-card {
+      padding: 10px 14px;
+      border-bottom: 1px solid #ede8db;
+      cursor: pointer;
+      transition: background 0.12s;
+      flex-shrink: 0;
+    }
+    .stay-card:hover { background: #f0ead8; }
+    .stay-head { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+    .stay-name   { font-weight: 700; font-size: 0.85rem; color: #5c3d22; }
+    .stay-nights { font-size: 0.68rem; color: #aaa; margin-top: 1px; }
+    .stay-link {
+      display: inline-block;
+      margin-left: 27px;
+      font-size: 0.75rem;
+      color: #1d6fc4;
+      text-decoration: none;
+    }
+    .stay-link:hover { text-decoration: underline; }
+    .stay-no-url { margin-left: 27px; font-size: 0.72rem; color: #ccc; }
+
+    /* ── Footer ── */
+    .sidebar-footer {
+      padding: 10px 14px;
+      font-size: 0.68rem;
+      color: #ccc;
+      text-align: center;
+      border-top: 1px solid #ede8db;
+      margin-top: auto;
+    }
+
+    /* ══ MOBILE / TABLET PORTRAIT ════════════════════ */
+    @media (max-width: 720px) {
+      .main { flex-direction: column; overflow: visible; height: auto !important; }
+      #map  { height: 58vw !important; min-height: 280px; flex: none; }
+      .sidebar {
+        width: 100%;
+        height: auto !important;
+        overflow-y: visible;
+        border-left: none;
+        border-top: 1px solid #e6dfc8;
+      }
+      .btn-all {
+        position: static;
+        display: inline-block;
+        margin-top: 7px;
+      }
+      .header { padding-bottom: 10px; }
+      .header h1 { font-size: 1.2rem; }
+    }
+
+    /* ══ MARKERS ══════════════════════════════════════ */
+    .mkr {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2.5px solid #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.42);
+    }
+    .stay-mkr {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      background: #7c5230;
+      border: 2.5px solid #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.42);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; line-height: 1;
+    }
+
+    /* ══ POPUP ════════════════════════════════════════ */
+    .lpop-name { font-weight: 700; font-size: 0.9rem; }
+    .lpop-note { font-size: 0.78rem; color: #777; margin-top: 2px; }
+    .lpop-day  { font-size: 0.68rem; color: #bbb; margin-top: 2px; }
+    .lpop-link {
+      display: inline-block; margin-top: 6px;
+      font-size: 0.8rem; color: #1d6fc4; text-decoration: none;
+    }
+    .lpop-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>🗾 2026 GW 家族旅行</h1>
+  <div class="sub">奈良 ・ 飛鳥 ・ 吉野 ・ 宇治 ・ 京都 ・ 滋賀</div>
+  <div class="dates">2026年4月28日（火）〜 5月10日（日）　13日間</div>
+  <div class="countdown" id="countdown">…</div>
+  <button class="btn-all" id="btnAll">🗺️ 全体</button>
+</header>
+
+<div class="main" id="main">
+  <div id="map"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sec-head">📅 日程</div>
+    <div id="dayCards"></div>
+    <div class="sec-head">🏠 宿泊地</div>
+    <div id="stayCards"></div>
+    <div class="sidebar-footer">📝 随時アップデート予定</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══ データ ═══════════════════════════════════════════════════
+const DAYS = [
+  {
+    n:1, date:"4/28（火）", label:"移動日", emoji:"🚗", color:"#94a3b8",
+    rest:false,
+    spots:[
+      { name:"千葉出発",   lat:35.6047, lng:140.1233, note:"旅のはじまり！" },
+      { name:"名古屋泊",   lat:35.1815, lng:136.9066, note:"移動・睡眠目的" }
+    ]
+  },
+  {
+    n:2, date:"4/29（水）", label:"奈良①", emoji:"🦌", color:"#f97316",
+    rest:false,
+    spots:[
+      { name:"東大寺",           lat:34.6888, lng:135.8398, note:"奈良の大仏" },
+      { name:"東大寺ミュージアム", lat:34.6875, lng:135.8390 },
+      { name:"奈良国立博物館",    lat:34.6851, lng:135.8407 },
+      { name:"奈良公園",         lat:34.6870, lng:135.8370, note:"鹿がいっぱい！" }
+    ]
+  },
+  {
+    n:3, date:"4/30（木）", label:"奈良②", emoji:"🏛️", color:"#f59e0b",
+    rest:false,
+    spots:[
+      { name:"平城宮跡歴史公園", lat:34.6882, lng:135.7849, note:"奈良時代の都" },
+      { name:"平城宮跡資料館",   lat:34.6895, lng:135.7834 },
+      { name:"奈良国立博物館",   lat:34.6851, lng:135.8407, note:"行けたら", opt:true }
+    ]
+  },
+  {
+    n:4, date:"5/1（金）", label:"のんびり", emoji:"😴", color:"#cbd5e1",
+    rest:true, note:"リモートワーク日。宿でゆっくり。",
+    spots:[{ name:"奈良公園周辺（宿泊地）", lat:34.6870, lng:135.8393 }]
+  },
+  {
+    n:5, date:"5/2（土）", label:"飛鳥", emoji:"⛩️", color:"#16a34a",
+    rest:false,
+    spots:[
+      { name:"法隆寺",           lat:34.6136, lng:135.7346, note:"世界最古の木造建築" },
+      { name:"飛鳥資料館",       lat:34.4761, lng:135.8307 },
+      { name:"石舞台古墳",       lat:34.4681, lng:135.8334 },
+      { name:"亀石",             lat:34.4740, lng:135.8180 },
+      { name:"酒船石・亀形石造物", lat:34.4750, lng:135.8276 },
+      { name:"益田岩船",         lat:34.4604, lng:135.8252, note:"余力あれば", opt:true }
+    ]
+  },
+  {
+    n:6, date:"5/3（日）", label:"吉野", emoji:"🌸", color:"#ec4899",
+    rest:false,
+    spots:[
+      { name:"金峯山寺（吉野）", lat:34.3698, lng:135.8577, note:"南朝・後醍醐天皇の地" }
+    ]
+  },
+  {
+    n:7, date:"5/4（月）", label:"宇治 → 滋賀", emoji:"🍵", color:"#a855f7",
+    rest:false,
+    spots:[
+      { name:"平等院",           lat:34.8888, lng:135.7978, note:"10円玉の鳳凰堂" },
+      { name:"鳳翔館",           lat:34.8893, lng:135.7981 },
+      { name:"宇治上神社",       lat:34.8919, lng:135.8096 },
+      { name:"源氏物語ミュージアム", lat:34.8951, lng:135.8107 }
+    ]
+  },
+  {
+    n:8, date:"5/5（火）", label:"京都", emoji:"🌟", color:"#3b82f6",
+    rest:false,
+    spots:[
+      { name:"銀閣寺",   lat:35.0271, lng:135.7985 },
+      { name:"金閣寺",   lat:35.0394, lng:135.7292, note:"金色に輝く！" },
+      { name:"二条城",   lat:35.0142, lng:135.7488, note:"余裕があれば", opt:true },
+      { name:"等持院",   lat:35.0264, lng:135.7274, note:"余裕があれば", opt:true }
+    ]
+  },
+  {
+    n:9, date:"5/6（水）", label:"比叡山・安土", emoji:"⛰️", color:"#0891b2",
+    rest:false,
+    spots:[
+      { name:"比叡山延暦寺（東塔）", lat:35.0786, lng:135.8406, note:"山の上の大寺院" },
+      { name:"安土城考古博物館",    lat:35.1451, lng:136.1345 },
+      { name:"安土城跡",           lat:35.1500, lng:136.1380, note:"信長のお城" },
+      { name:"信長の館",           lat:35.1460, lng:136.1360, note:"余力あれば", opt:true }
+    ]
+  },
+  {
+    n:10, date:"5/7（木）", label:"のんびり", emoji:"😴", color:"#cbd5e1",
+    rest:true, note:"リモートワーク日。宿でゆっくり。",
+    spots:[{ name:"大津市（宿泊地）", lat:35.0172, lng:135.8680 }]
+  },
+  {
+    n:11, date:"5/8（金）", label:"大津", emoji:"🔬", color:"#0d9488",
+    rest:false,
+    spots:[
+      { name:"大津こども科学館", lat:35.0172, lng:135.8680, note:"サイエンス体験！" },
+      { name:"琵琶湖博物館",    lat:35.1168, lng:135.9735, note:"琵琶湖の生き物" }
+    ]
+  },
+  {
+    n:12, date:"5/9（土）", label:"彦根・関ヶ原", emoji:"⚔️", color:"#dc2626",
+    rest:false,
+    spots:[
+      { name:"彦根城",       lat:35.2756, lng:136.2538, note:"ひこにゃんのお城" },
+      { name:"関ヶ原古戦場", lat:35.3647, lng:136.4637, note:"天下分け目の決戦地" },
+      { name:"額田市泊（愛知）", lat:34.9333, lng:137.4167, note:"移動・睡眠目的" }
+    ]
+  },
+  {
+    n:13, date:"5/10（日）", label:"帰宅", emoji:"🏠", color:"#94a3b8",
+    rest:false,
+    spots:[
+      { name:"千葉へ帰宅", lat:35.6047, lng:140.1233, note:"おつかれさまでした！" }
+    ]
+  }
+];
+
+const STAYS = [
+  {
+    name:"名古屋 Airbnb",
+    nights:"4/28（1泊）", note:"移動・睡眠目的",
+    lat:35.1815, lng:136.9066,
+    url:"https://www.airbnb.jp/rooms/1557045630177891470"
+  },
+  {
+    name:"奈良公園周辺 宿",
+    nights:"4/29〜5/1（3泊）", note:"",
+    lat:34.6870, lng:135.8450,
+    url:"https://www.airbnb.jp/rooms/1201218457332876859"
+  },
+  {
+    name:"大和高田市 宿",
+    nights:"5/2〜5/3（2泊）", note:"",
+    lat:34.5139, lng:135.7334,
+    url:"https://www.airbnb.jp/rooms/1176660219306553024"
+  },
+  {
+    name:"滋賀大津市 宿",
+    nights:"5/4〜5/8（5泊）", note:"",
+    lat:35.0250, lng:135.8680,
+    url:"https://www.airbnb.jp/rooms/1530244625712119614"
+  },
+  {
+    name:"額田市 Airbnb",
+    nights:"5/9（1泊）", note:"移動・睡眠目的",
+    lat:34.9333, lng:137.4167,
+    url:"https://www.airbnb.jp/rooms/1350640394616069969"
+  }
+];
+
+// ══ カウントダウン ═══════════════════════════════════════════
+(function() {
+  const start = new Date('2026-04-28');
+  const end   = new Date('2026-05-11'); // 帰宅翌日
+  const now   = new Date(); now.setHours(0,0,0,0);
+  const diff  = Math.round((start - now) / 86400000);
+  const dayOf = Math.round((now - start) / 86400000) + 1;
+  let txt;
+  if      (diff > 0)       txt = `旅まであと ${diff} 日！`;
+  else if (diff === 0)     txt = '今日、出発！ 🚗';
+  else if (now < end)      txt = `旅の ${dayOf} 日目！ 🎌`;
+  else                     txt = '楽しい旅の思い出 ✨';
+  document.getElementById('countdown').textContent = txt;
+})();
+
+// ══ 地図 ════════════════════════════════════════════════════
+const map = L.map('map', { center:[34.9, 135.9], zoom:8 });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom:18
+}).addTo(map);
+
+// ══ レイアウト高さ調整（タブレット・PC対応）══════════════════
+function adjustLayout() {
+  const isMobile = window.innerWidth <= 720;
+  const mainEl   = document.getElementById('main');
+  const sideEl   = document.getElementById('sidebar');
+  if (isMobile) {
+    mainEl.style.height = '';
+    sideEl.style.height = '';
+  } else {
+    const h = window.innerHeight - document.querySelector('.header').offsetHeight;
+    mainEl.style.height = h + 'px';
+    sideEl.style.height = h + 'px';
+  }
+  map.invalidateSize();
+}
+window.addEventListener('resize', adjustLayout);
+window.addEventListener('orientationchange', () => setTimeout(adjustLayout, 250));
+
+// ══ ルートライン ════════════════════════════════════════════
+const allLL = DAYS.flatMap(d => d.spots.map(s => [s.lat, s.lng]));
+// 全体の薄いベースライン
+L.polyline(allLL, { color:'#9cb4c8', weight:1.5, opacity:0.25 }).addTo(map);
+
+// 日ごとのカラーライン
+const dayPolylines = {};
+DAYS.forEach(d => {
+  if (d.spots.length < 2) return;
+  const poly = L.polyline(d.spots.map(s => [s.lat, s.lng]), {
+    color: d.color, weight:3, opacity:0.72
+  }).addTo(map);
+  dayPolylines[d.n] = poly;
+});
+
+// ══ 宿泊地マーカー ══════════════════════════════════════════
+STAYS.forEach(s => {
+  const icon = L.divIcon({
+    className:'',
+    html:'<div class="stay-mkr">🏠</div>',
+    iconSize:[22,22], iconAnchor:[11,11]
+  });
+  const linkHtml = s.url
+    ? `<a class="lpop-link" href="${safeUrl(s.url)}" target="_blank" rel="noopener noreferrer">予約ページを見る →</a>`
+    : `<span style="color:#ccc;font-size:0.75rem">（URL未登録）</span>`;
+  L.marker([s.lat, s.lng], { icon }).addTo(map).bindPopup(`
+    <div class="lpop-name">🏠 ${s.name}</div>
+    <div class="lpop-note">${s.nights}${s.note ? '　' + s.note : ''}</div>
+    ${linkHtml}
+  `);
+});
+
+// ══ 観光地マーカー ═══════════════════════════════════════════
+const dayMarkersMap = {};
+DAYS.forEach(d => {
+  dayMarkersMap[d.n] = [];
+  d.spots.forEach(s => {
+    const icon = L.divIcon({
+      className:'',
+      html:`<div class="mkr" style="background:${d.color}"></div>`,
+      iconSize:[14,14], iconAnchor:[7,7]
+    });
+    const m = L.marker([s.lat, s.lng], { icon }).addTo(map);
+    m.bindPopup(`
+      <div class="lpop-name">${s.name}</div>
+      ${s.note ? `<div class="lpop-note">${s.note}</div>` : ''}
+      <div class="lpop-day">Day ${d.n}　${d.date}　${d.label}</div>
+    `);
+    dayMarkersMap[d.n].push(m);
+  });
+});
+
+// ══ 日程カード ═══════════════════════════════════════════════
+const dayCardsEl = document.getElementById('dayCards');
+DAYS.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.style.borderLeftColor = d.color;
+
+  const body = d.rest
+    ? `<div class="rest-note">${d.note}</div>`
+    : `<div class="spot-list">${
+        d.spots.map(s =>
+          `<div class="spot-item">
+            ${s.name}
+            ${s.note && !s.opt ? `<span style="color:#d0c8b8">（${s.note}）</span>` : ''}
+            ${s.opt ? `<span class="spot-opt">（${s.note}）</span>` : ''}
+          </div>`
+        ).join('')
+      }</div>`;
+
+  card.innerHTML = `
+    <div class="card-head">
+      <span class="card-emoji">${d.emoji}</span>
+      <div>
+        <div class="card-label" style="color:${d.color}">${d.label}</div>
+        <div class="card-date">Day ${d.n} &middot; ${d.date}</div>
+      </div>
+    </div>
+    ${body}
+  `;
+
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    // ラインハイライト
+    Object.entries(dayPolylines).forEach(([n, poly]) => {
+      parseInt(n) === d.n
+        ? poly.setStyle({ weight:6, opacity:1 }) && poly.bringToFront()
+        : poly.setStyle({ weight:2, opacity:0.15 });
+    });
+    const bounds = L.latLngBounds(d.spots.map(s => [s.lat, s.lng]));
+    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+      map.setView(bounds.getCenter(), 13);
+    } else {
+      map.fitBounds(bounds, { padding:[60,60], maxZoom:14 });
+    }
+  });
+
+  dayCardsEl.appendChild(card);
+});
+
+// ══ 宿泊地カード ═════════════════════════════════════════════
+const stayCardsEl = document.getElementById('stayCards');
+STAYS.forEach(s => {
+  const card = document.createElement('div');
+  card.className = 'stay-card';
+
+  const linkHtml = s.url
+    ? `<a class="stay-link" href="${safeUrl(s.url)}" target="_blank" rel="noopener noreferrer">予約ページを見る →</a>`
+    : `<div class="stay-no-url">URL未登録</div>`;
+
+  card.innerHTML = `
+    <div class="stay-head">
+      <span class="card-emoji">🏠</span>
+      <div>
+        <div class="stay-name">${s.name}</div>
+        <div class="stay-nights">${s.nights}${s.note ? '　' + s.note : ''}</div>
+      </div>
+    </div>
+    ${linkHtml}
+  `;
+
+  card.addEventListener('click', e => {
+    if (e.target.tagName === 'A') return; // リンククリックはそのまま
+    map.setView([s.lat, s.lng], 14);
+  });
+
+  stayCardsEl.appendChild(card);
+});
+
+// ══ 全体ボタン ═══════════════════════════════════════════════
+document.getElementById('btnAll').addEventListener('click', () => {
+  document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
+  Object.values(dayPolylines).forEach(p => p.setStyle({ weight:3, opacity:0.72 }));
+  map.fitBounds(L.latLngBounds(allLL), { padding:[30,30] });
+});
+
+// ══ URLサニタイズ（XSS対策）════════════════════════════════
+function safeUrl(url) {
+  return (url && /^https:\/\//.test(url)) ? url : '#';
+}
+
+// ══ 初期化完了後にレイアウト確定 ═════════════════════════════
+map.whenReady(adjustLayout);
+adjustLayout();
+</script>
+</body>
+</html>
