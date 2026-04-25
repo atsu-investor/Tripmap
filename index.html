@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>2026 GW 家族旅行 ― 奈良・京都・滋賀</title>
+  <title>2026GW旅行 ― 奈良・京都・滋賀</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -21,7 +21,7 @@
     .header {
       flex-shrink: 0;
       background:
-        linear-gradient(135deg, rgba(20,45,80,0.78) 0%, rgba(20,80,110,0.72) 60%, rgba(15,80,65,0.80) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.44) 100%),
         url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Horyuji11s3200.jpg/1280px-Horyuji11s3200.jpg') center 40% / cover no-repeat;
       color: white;
       padding: 14px 16px 12px;
@@ -151,6 +151,7 @@
     .stay-head { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
     .stay-name   { font-weight: 700; font-size: 0.85rem; color: #5c3d22; }
     .stay-nights { font-size: 0.68rem; color: #aaa; margin-top: 1px; }
+    .stay-location { margin-left: 27px; font-size: 0.72rem; color: #9a7850; margin-bottom: 3px; }
     .stay-link {
       display: inline-block;
       margin-left: 27px;
@@ -222,7 +223,7 @@
 <body>
 
 <header class="header">
-  <h1>🗾 2026 GW 家族旅行</h1>
+  <h1>🗾 2026GW旅行</h1>
   <div class="sub">奈良 ・ 飛鳥 ・ 吉野 ・ 宇治 ・ 京都 ・ 滋賀</div>
   <div class="dates">2026年4月28日（火）〜 5月10日（日）　13日間</div>
   <div class="countdown" id="countdown">…</div>
@@ -247,14 +248,16 @@ const DAYS = [
   {
     n:1, date:"4/28（火）", label:"移動日", emoji:"🚗", color:"#94a3b8",
     rest:false,
+    from:[35.6047,140.1233], to:[35.1815,136.9066],
     spots:[
       { name:"千葉出発",   lat:35.6047, lng:140.1233, note:"旅のはじまり！" },
       { name:"名古屋泊",   lat:35.1815, lng:136.9066, note:"移動・睡眠目的" }
     ]
   },
   {
-    n:2, date:"4/29（水）", label:"奈良①", emoji:"🦌", color:"#f97316",
+    n:2, date:"4/29（水）", label:"奈良東大寺", emoji:"🦌", color:"#f97316",
     rest:false,
+    from:[35.1815,136.9066], to:[34.6870,135.8450],
     spots:[
       { name:"東大寺",           lat:34.6888, lng:135.8398, note:"奈良の大仏" },
       { name:"東大寺ミュージアム", lat:34.6875, lng:135.8390 },
@@ -263,8 +266,9 @@ const DAYS = [
     ]
   },
   {
-    n:3, date:"4/30（木）", label:"奈良②", emoji:"🏛️", color:"#f59e0b",
+    n:3, date:"4/30（木）", label:"奈良平城京", emoji:"🏛️", color:"#f59e0b",
     rest:false,
+    from:[34.6870,135.8450], to:[34.6870,135.8450],
     spots:[
       { name:"平城宮跡歴史公園", lat:34.6882, lng:135.7849, note:"奈良時代の都" },
       { name:"平城宮跡資料館",   lat:34.6895, lng:135.7834 },
@@ -272,13 +276,15 @@ const DAYS = [
     ]
   },
   {
-    n:4, date:"5/1（金）", label:"のんびり", emoji:"😴", color:"#cbd5e1",
+    n:4, date:"5/1（金）", label:"奈良でのんびり", emoji:"😴", color:"#cbd5e1",
     rest:true, note:"リモートワーク日。宿でゆっくり。",
+    from:[34.6870,135.8450], to:[34.6870,135.8450],
     spots:[{ name:"奈良公園周辺（宿泊地）", lat:34.6870, lng:135.8393 }]
   },
   {
-    n:5, date:"5/2（土）", label:"飛鳥", emoji:"⛩️", color:"#16a34a",
+    n:5, date:"5/2（土）", label:"法隆寺と飛鳥時代", emoji:"⛩️", color:"#16a34a",
     rest:false,
+    from:[34.6870,135.8450], to:[34.5139,135.7334],
     spots:[
       { name:"法隆寺",           lat:34.6136, lng:135.7346, note:"世界最古の木造建築" },
       { name:"飛鳥資料館",       lat:34.4761, lng:135.8307 },
@@ -289,15 +295,17 @@ const DAYS = [
     ]
   },
   {
-    n:6, date:"5/3（日）", label:"吉野", emoji:"🌸", color:"#ec4899",
+    n:6, date:"5/3（日）", label:"奈良吉野（南朝）", emoji:"🌸", color:"#ec4899",
     rest:false,
+    from:[34.5139,135.7334], to:[34.5139,135.7334],
     spots:[
       { name:"金峯山寺（吉野）", lat:34.3698, lng:135.8577, note:"南朝・後醍醐天皇の地" }
     ]
   },
   {
-    n:7, date:"5/4（月）", label:"宇治 → 滋賀", emoji:"🍵", color:"#a855f7",
+    n:7, date:"5/4（月）", label:"京都（平等院と宇治）", emoji:"🍵", color:"#a855f7",
     rest:false,
+    from:[34.5139,135.7334], to:[35.0250,135.8680],
     spots:[
       { name:"平等院",           lat:34.8888, lng:135.7978, note:"10円玉の鳳凰堂" },
       { name:"鳳翔館",           lat:34.8893, lng:135.7981 },
@@ -308,6 +316,7 @@ const DAYS = [
   {
     n:8, date:"5/5（火）", label:"京都", emoji:"🌟", color:"#3b82f6",
     rest:false,
+    from:[35.0250,135.8680], to:[35.0250,135.8680],
     spots:[
       { name:"銀閣寺",   lat:35.0271, lng:135.7985 },
       { name:"金閣寺",   lat:35.0394, lng:135.7292, note:"金色に輝く！" },
@@ -316,8 +325,9 @@ const DAYS = [
     ]
   },
   {
-    n:9, date:"5/6（水）", label:"比叡山・安土", emoji:"⛰️", color:"#0891b2",
+    n:9, date:"5/6（水）", label:"比叡山と安土城", emoji:"⛰️", color:"#0891b2",
     rest:false,
+    from:[35.0250,135.8680], to:[35.0250,135.8680],
     spots:[
       { name:"比叡山延暦寺（東塔）", lat:35.0786, lng:135.8406, note:"山の上の大寺院" },
       { name:"安土城考古博物館",    lat:35.1451, lng:136.1345 },
@@ -328,19 +338,22 @@ const DAYS = [
   {
     n:10, date:"5/7（木）", label:"のんびり", emoji:"😴", color:"#cbd5e1",
     rest:true, note:"リモートワーク日。宿でゆっくり。",
+    from:[35.0250,135.8680], to:[35.0250,135.8680],
     spots:[{ name:"大津市（宿泊地）", lat:35.0172, lng:135.8680 }]
   },
   {
-    n:11, date:"5/8（金）", label:"大津", emoji:"🔬", color:"#0d9488",
+    n:11, date:"5/8（金）", label:"琵琶湖のんびり", emoji:"🔬", color:"#0d9488",
     rest:false,
+    from:[35.0250,135.8680], to:[35.0250,135.8680],
     spots:[
       { name:"大津こども科学館", lat:35.0172, lng:135.8680, note:"サイエンス体験！" },
       { name:"琵琶湖博物館",    lat:35.1168, lng:135.9735, note:"琵琶湖の生き物" }
     ]
   },
   {
-    n:12, date:"5/9（土）", label:"彦根・関ヶ原", emoji:"⚔️", color:"#dc2626",
+    n:12, date:"5/9（土）", label:"彦根城と関ヶ原", emoji:"⚔️", color:"#dc2626",
     rest:false,
+    from:[35.0250,135.8680], to:[34.9333,137.4167],
     spots:[
       { name:"彦根城",       lat:35.2756, lng:136.2538, note:"ひこにゃんのお城" },
       { name:"関ヶ原古戦場", lat:35.3647, lng:136.4637, note:"天下分け目の決戦地" },
@@ -348,8 +361,9 @@ const DAYS = [
     ]
   },
   {
-    n:13, date:"5/10（日）", label:"帰宅", emoji:"🏠", color:"#94a3b8",
+    n:13, date:"5/10（日）", label:"千葉に帰宅", emoji:"🏠", color:"#94a3b8",
     rest:false,
+    from:[34.9333,137.4167], to:[35.6047,140.1233],
     spots:[
       { name:"千葉へ帰宅", lat:35.6047, lng:140.1233, note:"おつかれさまでした！" }
     ]
@@ -360,30 +374,35 @@ const STAYS = [
   {
     name:"名古屋 Airbnb",
     nights:"4/28（1泊）", note:"移動・睡眠目的",
+    location:"愛知県名古屋市",
     lat:35.1815, lng:136.9066,
     url:"https://www.airbnb.jp/rooms/1557045630177891470"
   },
   {
     name:"奈良公園周辺 宿",
     nights:"4/29〜5/1（3泊）", note:"",
+    location:"奈良県奈良市 ― 東大寺・奈良公園エリア拠点",
     lat:34.6870, lng:135.8450,
     url:"https://www.airbnb.jp/rooms/1201218457332876859"
   },
   {
     name:"大和高田市 宿",
     nights:"5/2〜5/3（2泊）", note:"",
+    location:"奈良県大和高田市 ― 飛鳥・吉野アクセス拠点",
     lat:34.5139, lng:135.7334,
     url:"https://www.airbnb.jp/rooms/1176660219306553024"
   },
   {
     name:"滋賀大津市 宿",
     nights:"5/4〜5/8（5泊）", note:"",
+    location:"滋賀県大津市 ― 宇治・京都・比叡山・安土アクセス拠点",
     lat:35.0250, lng:135.8680,
     url:"https://www.airbnb.jp/rooms/1530244625712119614"
   },
   {
     name:"額田市 Airbnb",
     nights:"5/9（1泊）", note:"移動・睡眠目的",
+    location:"愛知県岡崎市額田区",
     lat:34.9333, lng:137.4167,
     url:"https://www.airbnb.jp/rooms/1350640394616069969"
   }
@@ -397,10 +416,19 @@ const STAYS = [
   const diff  = Math.round((start - now) / 86400000);
   const dayOf = Math.round((now - start) / 86400000) + 1;
   let txt;
-  if      (diff > 0)       txt = `旅まであと ${diff} 日！`;
-  else if (diff === 0)     txt = '今日、出発！ 🚗';
-  else if (now < end)      txt = `旅の ${dayOf} 日目！ 🎌`;
-  else                     txt = '楽しい旅の思い出 ✨';
+  if (diff > 0) {
+    txt = `旅まであと ${diff} 日！`;
+  } else if (diff === 0) {
+    txt = '今日、出発！ 🚗';
+  } else if (now < end) {
+    const today    = DAYS[dayOf - 1];
+    const tomorrow = DAYS[dayOf];
+    const tLabel = today    ? `${today.emoji}${today.label}` : '';
+    const mLabel = tomorrow ? `${tomorrow.emoji}${tomorrow.label}` : '千葉へ帰宅🏠';
+    txt = `今日は${tLabel}　明日は${mLabel}`;
+  } else {
+    txt = '楽しい旅の思い出 ✨';
+  }
   document.getElementById('countdown').textContent = txt;
 })();
 
@@ -429,22 +457,20 @@ function adjustLayout() {
 window.addEventListener('resize', adjustLayout);
 window.addEventListener('orientationchange', () => setTimeout(adjustLayout, 250));
 
-// ══ 宿→宿 移動ライン（旅の大動脈）════════════════════════
-const stayRoute = [
-  [35.6047, 140.1233],  // 千葉（出発）
-  [35.1815, 136.9066],  // 名古屋
-  [34.6870, 135.8450],  // 奈良公園周辺
-  [34.5139, 135.7334],  // 大和高田市
-  [35.0250, 135.8680],  // 滋賀大津市
-  [34.9333, 137.4167],  // 額田市
-  [35.6047, 140.1233],  // 千葉（帰宅）
+// ══ 宿→宿 移動セグメント（ラベル付き）════════════════════
+const ROUTE_SEGS = [
+  { label:"Day1 移動：千葉 → 名古屋（約350km）",    pts:[[35.6047,140.1233],[35.1815,136.9066]] },
+  { label:"Day1→2 移動：名古屋 → 奈良（約100km）", pts:[[35.1815,136.9066],[34.6870,135.8450]] },
+  { label:"Day4→5 宿移動：奈良 → 大和高田（約20km）",    pts:[[34.6870,135.8450],[34.5139,135.7334]] },
+  { label:"Day6→7 宿移動：大和高田 → 滋賀大津（約95km）",pts:[[34.5139,135.7334],[35.0250,135.8680]] },
+  { label:"Day12 移動：大津 → 彦根・関ヶ原 → 額田（約110km）",pts:[[35.0250,135.8680],[34.9333,137.4167]] },
+  { label:"Day13 移動：額田 → 千葉（約350km）",    pts:[[34.9333,137.4167],[35.6047,140.1233]] },
 ];
-L.polyline(stayRoute, {
-  color: '#c0813a',
-  weight: 3,
-  opacity: 0.55,
-  dashArray: '10, 8'
-}).addTo(map);
+ROUTE_SEGS.forEach(seg => {
+  L.polyline(seg.pts, {
+    color: '#c0813a', weight: 4, opacity: 0.65, dashArray: '10, 7'
+  }).addTo(map).bindPopup(`<div style="font-size:0.82rem;font-weight:700;color:#7c4a10">${seg.label}</div>`);
+});
 
 // ══ ルートライン ════════════════════════════════════════════
 const allLL = DAYS.flatMap(d => d.spots.map(s => [s.lat, s.lng]));
@@ -499,6 +525,7 @@ DAYS.forEach(d => {
 });
 
 // ══ 日程カード ═══════════════════════════════════════════════
+let routeOverlay = null;
 const dayCardsEl = document.getElementById('dayCards');
 DAYS.forEach(d => {
   const card = document.createElement('div');
@@ -537,11 +564,25 @@ DAYS.forEach(d => {
         ? poly.setStyle({ weight:6, opacity:1 }) && poly.bringToFront()
         : poly.setStyle({ weight:2, opacity:0.15 });
     });
-    const bounds = L.latLngBounds(d.spots.map(s => [s.lat, s.lng]));
+    // 前宿→スポット→今夜の宿 のフルルートオーバーレイ
+    if (routeOverlay) { map.removeLayer(routeOverlay); routeOverlay = null; }
+    const fullPts = [
+      ...(d.from ? [d.from] : []),
+      ...d.spots.map(s => [s.lat, s.lng]),
+      ...(d.to ? [d.to] : [])
+    ];
+    if (fullPts.length >= 2) {
+      routeOverlay = L.polyline(fullPts, {
+        color: d.color, weight: 5, opacity: 0.92
+      }).addTo(map).bringToFront();
+    }
+    // バウンド（from/to含む）
+    const allPts = fullPts.length > 0 ? fullPts : d.spots.map(s => [s.lat, s.lng]);
+    const bounds = L.latLngBounds(allPts);
     if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
       map.setView(bounds.getCenter(), 13);
     } else {
-      map.fitBounds(bounds, { padding:[60,60], maxZoom:14 });
+      map.fitBounds(bounds, { padding:[60,60], maxZoom:13 });
     }
   });
 
@@ -566,6 +607,7 @@ STAYS.forEach(s => {
         <div class="stay-nights">${s.nights}${s.note ? '　' + s.note : ''}</div>
       </div>
     </div>
+    ${s.location ? `<div class="stay-location">📍 ${s.location}</div>` : ''}
     ${linkHtml}
   `;
 
@@ -581,6 +623,7 @@ STAYS.forEach(s => {
 document.getElementById('btnAll').addEventListener('click', () => {
   document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
   Object.values(dayPolylines).forEach(p => p.setStyle({ weight:3, opacity:0.72 }));
+  if (routeOverlay) { map.removeLayer(routeOverlay); routeOverlay = null; }
   map.fitBounds(L.latLngBounds(allLL), { padding:[30,30] });
 });
 
